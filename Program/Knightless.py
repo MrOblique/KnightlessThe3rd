@@ -106,6 +106,10 @@ while running:
             game_state = gameStates.paused(screen, small_exit_button)
     if game_state == "Quit": # if in the quit gamestate
         running = False # close game
+    if game_state == "LevelSelect":
+        game_state = gameStates.levelSelect(screen, computer_image, play_button, settings_exit_button)
+    if game_state == "CharacterSelect":
+        game_state = gameStates.characterSelect(screen, computer_image, play_button, settings_exit_button)
     # if X is pressed then close game
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
