@@ -23,7 +23,8 @@ def hCollisionHandler(player, enemies, projectiles):
             hitboxes.append(("enemy", enemy, enemy.hitbox))
     # projectiles
     for proj in projectiles:
-        hitboxes.append(("projectile", proj, proj.rect))
+        if proj.hitbox_active:
+            hitboxes.append(("projectile", proj, proj.rect))
 
     # HURTBOXES
     # player hurtbox
@@ -33,6 +34,25 @@ def hCollisionHandler(player, enemies, projectiles):
         # making sure enemy is alive
         if enemy.state != "Dead":
             hurtboxes.append(("enemy", enemy, enemy.rect))
+    # HITBOXES
+    # player hitbox
+    hitboxes.append(("player", player, player.hitbox))
+    # enemy hitbox
+    for enemy in enemies:
+        if enemy.state != "Dead":
+            if enemy.hitbox_active:
+                hitboxes.append(("enemy", enemy, enemy.hitbox))
+    #  COLLISION HANDLER
+    for hitbox in hitboxes:
+        for hurtbox in hurtboxes:
+            if hitbox[2] and hurtbox[2]:
+                if hitbox[2].colliderect(hurtbox[2]):
+                    if hitbox[0] != hurtbox[0]:
+                        print(hitbox[0])
+                        print(hurtbox[0])
+                        hurtbox[1].state = "Hurt"
+                        hurtbox[1].hurt_cd = 100
+                        pass
 
 class Entity(pygame.sprite.Sprite):
     def __init__(self, name, x, y, width, height, x_velocity, y_velocity, x_acceleration, y_acceleration, max_x_velocity, colour, sprites, animation_number, class_name):
@@ -55,7 +75,7 @@ class Entity(pygame.sprite.Sprite):
         self.grounded = False # is object touching ground
         self.isAttacking = False # is the object attacking
         self.attack_cd = 0  # attack cooldown
-        self.hurt_cd = 20  # hurt duration stun
+        self.hurt_cd = 0  # hurt duration stun
         self.state = "Patrol"  # dictate the action the entity will do
         self.hitbox = None
         self.hitbox_active = False
@@ -83,6 +103,7 @@ class Entity(pygame.sprite.Sprite):
                 self.animation_number = 3
             elif self.state == "Hurt":
                 self.animation_number = 4
+                self.frame_number = 0
             # cycles between different attack cycles
             # if not in attack animation and is attacking, switch to attack animation
             elif self.state == "Attack":
@@ -183,6 +204,7 @@ class Entity(pygame.sprite.Sprite):
             if self.rect.colliderect(tile):
                 if self.name == "Projectile":
                     self.kill()
+                    self.hitbox_active = False
                 # if enemy and patrolling, switch directions when hitting wall
                 if self.name == "Enemy" and self.state == "Patrol":
                     self.direction *= -1
@@ -216,6 +238,7 @@ class Entity(pygame.sprite.Sprite):
             # kill projectile if dead
             if self.lifespan <= 0:
                 self.kill()
+                self.hitbox_active = False
             self.y_velocity = 0
             self.y_acceleration = 0
 
@@ -268,6 +291,7 @@ class Entity(pygame.sprite.Sprite):
                 else:
                     self.image_offset = (-32, -128)
         self.frame_number += 0.05 * dt
+        print(f"State of {self.class_name} : {self.state}")
     def getProperties(self):
         return self.x, self.y, self.rect.width, self.rect.height
 
@@ -503,6 +527,7 @@ class Projectile(Entity):
     def __init__(self, x, y, direction, lifespan, sprites, animation_number, class_name):
         pygame.sprite.Sprite.__init__(self, all_sprites, projectiles)
         self.lifespan = lifespan
+        self.hitbox_active = True
         Entity.__init__(self, "Projectile", x, y, 25, 5, 1 * direction, 0, 0,
                         0, 1, (255,255,255), sprites, animation_number, class_name)
         self.image_offset = (0, 0)
