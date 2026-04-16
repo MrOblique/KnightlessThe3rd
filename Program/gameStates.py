@@ -11,7 +11,7 @@ def mainMenu(screen, computer_image, play_button, settings_button, exit_button):
     screen.blit(computer_image, (200,10)) # draw computer bg
     action = play_button.draw(screen) # draw and check return of play button
     if action:
-        return "PlayMenu"
+        return "LevelSelect"
     action = settings_button.draw(screen) # draw and check return of settings button
     if action:
         print("Settings")
@@ -90,6 +90,7 @@ def playing(screen, exit_button, dt):
     if key_pressed[pygame.K_p]:
         game_state = "Paused"
     # check collisions
+    print(projectiles)
     game.hCollisionHandler(player, enemies, projectiles)
     # draw all sprites
     for sprite in all_sprites:
@@ -103,7 +104,36 @@ def playing(screen, exit_button, dt):
 
 def paused(screen, exit_button):
     action = exit_button.draw(screen)  # draw and check return of exit button
+    key_pressed = pygame.key.get_pressed()  # returns the states of all the keys
+    if key_pressed[pygame.K_o]:
+        return "Playing"
     if action:
         print("Exit")
         return "Playing"
     return "Paused"
+
+def levelSelect(screen, computer_image, play_button, exit_button):
+    screen.fill("Black")
+    screen.blit(computer_image, (200, 10))
+    levels = pygame.Rect(415,200, 500, 200)
+    pygame.draw.rect(screen, (255,255,255), levels)
+    action = play_button.draw(screen)  # draw and check return of play button
+    if action:
+        return "CharacterSelect"
+    action = exit_button.draw(screen)  # draw and check return of exit button
+    if action:
+        print("Exit")
+        return "MainMenu"
+    return "LevelSelect"
+
+def characterSelect(screen, computer_image, play_button, exit_button):
+    screen.fill("Black")
+    screen.blit(computer_image, (200, 10))
+    action = play_button.draw(screen)  # draw and check return of play button
+    if action:
+        return "Playing"
+    action = exit_button.draw(screen)  # draw and check return of exit button
+    if action:
+        print("Exit")
+        return "MainMenu"
+    return "CharacterSelect"
